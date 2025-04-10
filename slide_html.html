@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>てんゆは天災だああ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            background-color: #111;
+        }
+
+        .slideshow-container {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .slides {
+            display: flex;
+            transition: transform 0.5s ease;
+            width: 100%;
+        }
+
+        .slide {
+            min-width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            background-color: #333;
+            position: relative;
+            font-size: 50px;
+        }
+
+        /* Special font size for 1st and 4th slide */
+        .slide:nth-child(1),
+        .slide:nth-child(4) {
+            font-size: 150px;
+            background-color: #444;
+        }
+
+        img,
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .video-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 20px;
+            width: 90%;
+            height: 90%;
+        }
+
+        .video-container iframe:nth-child(3) {
+            grid-column: span 2;
+        }
+
+        /* Background video style for slide 10 */
+        .background-video-slide {
+            position: relative;
+            width: 100%;
+            height: 100vh; /* Ensure it takes full viewport height */
+            overflow: hidden;
+        }
+
+        .background-video-slide iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Make sure the video fills the screen */
+            z-index: 0;
+        }
+
+        .background-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 2304px ;
+            height: 2765px;
+            background: rgba(0, 0, 0, 0.4); /* Darker overlay */
+            z-index: 1;
+        }
+
+        .background-video-slide .content.overlay-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            text-align: center;
+            color: white;
+            font-size: 80px;
+            font-weight: bold;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7); /* Optional: Add text shadow for better visibility */
+        }
+
+        /* New slide 9 style with background image */
+        .background-image-slide {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .background-image-slide .background-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+        }
+
+        .background-image-slide .background-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 1;
+        }
+
+        .background-image-slide .content {
+            position: relative;
+            z-index: 2;
+            font-size: 50px;
+            text-align: center;
+            color: white;
+            top: -100px;
+        }
+
+        .activity-list {
+            list-style-type: none;
+            padding-left: 0;
+            text-align: left;
+        }
+
+        /* Pop-up animation for the warning slide */
+        .warning h2 {
+            animation: none;
+            visibility: hidden;
+            font-size: 72px;
+        }
+
+        .warning.pop-up h2 {
+            animation: popUp 0.5s forwards;
+            background-color: yellow;
+            color: black;
+        }
+
+        @keyframes popUp {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Background animation provided by the user */
+        .bg .bg-wrap {
+            position: relative;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        .bg.is-animated .bg-wrap::before {
+            animation: bg 2.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            background: linear-gradient(to right, #FFFF00 0%, #FFFF00 50%, #FFFF00 100%);
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform-origin: left center;
+        }
+
+        .bg .bg-wrap .inn {
+            color: red;
+            display: inline-block;
+            font-size: 70px;
+            font-weight: bold;
+            padding: 5px 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes bg {
+            0% {
+                opacity: 0;
+                transform: scaleX(0) translateX(-5%);
+            }
+
+            30% {
+                transform: scaleX(1) translateX(0);
+            }
+
+            100% {
+                transform: scaleX(1) translateX(0);
+            }
+
+            30%,
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* Position the "davinci resolve 19" text */
+        .video-container p {
+            position: absolute;
+            bottom: 150px;
+            right: 140px;
+            text-align: center;
+            color: white;
+            font-size: 70px;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slideshow-container">
+        <div class="slides">
+            <div class="slide">パソコン部　紹介</div>
+            <div class="slide"><img src="https://iili.io/3FxNJj9.jpg" alt="Slide 2"></div>
+            <div class="slide"><img src="https://iili.io/3FxN3Cu.jpg" alt="Slide 3"></div>
+            <div class="slide"><h2>活動内容</h2></div>
+            <div class="slide">小説作り <iframe id="AIwrite" src="https://player.vimeo.com/video/1063990822?h=205c33b6d9&amp;title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&autoplay=1&controls=0&loop=1&muted=1" width="785" height="402" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" title="rpreplay-final1741510702_wzM8rXOl"></iframe></div>
+            <div class="slide"><iframe id="othello" src="https://player.vimeo.com/video/1063794728?h=9d2fc807ac&title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&controls=0&loop=1&muted=1" width="632.8" height="439.2" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" title="rpreplay-final1741414254_S0Xg4x1m"></iframe>ボードゲーム</div>
+            <div class="slide">プログラミング<br>卒業生作→</br><iframe src="https://player.vimeo.com/video/1063765680?h=192aa8ac05&amp;title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&autoplay=1&controls=0&loop=1&muted=1" width="624" height="390" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" title="video"></iframe></div>
+            <div class="slide"><h2>動画制作</h2></div>
+            <div class="slide">
+                <div class="video-container">
+                    <iframe src="https://player.vimeo.com/video/1063768315?h=6662753f68&amp;title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&autoplay=1&controls=0&loop=1&muted=1" width="480" height="268" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" title="RPReplay_Final1741242989"></iframe>
+                    <iframe src="https://player.vimeo.com/video/1064486902?h=2fa81dfb8d&amp;title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&autoplay=1&controls=0&loop=1&muted=1" width="480" height="270" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" title="ふじなみわーるど"></iframe>
+                    <iframe src="https://player.vimeo.com/video/1064577507?h=c16500616d&amp;title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&autoplay=1&controls=0&loop=1&muted=1" width="480" height="270" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" title="私のｂ"></iframe>
+                    <p>davinci resolve 19</p>
+                </div>
+            </div>
+            <div class="slide background-image-slide">
+                <img src="https://iili.io/3fUfGN2.jpg" alt="Slide 9" class="background-image">
+                <div class="background-overlay"></div>
+                <div class="content">
+                    <h2>部活情報</h2>
+                    <h3>———————————</h3>
+                    <ul class="activity-list">
+                        <li>・場所：5階メディアセンター</li>
+                        <li>・日にち：毎週火曜日</li>
+                        <li>・時間：放課後5時まで</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="warning slide bg">
+                <span class="bg-wrap"><h2 class="inn">ゲームはしません！！</h2></span>
+            </div>
+            <!-- Slide 12 - Background Video with Text Overlay -->
+            <div class="slide background-video-slide">
+                <div class="background-overlay"></div>
+                <iframe src="https://player.vimeo.com/video/1067662927?h=222a7dbc2a&amp;title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&autoplay=1&controls=0&loop=1&muted=1" width="2304" height="1294" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" title="RPReplay_Final1742462449-ezgif.com-video-speed"></iframe>
+                <div class="content overlay-content">
+                    <h2>終わり</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slidesContainer = document.querySelector('.slides');
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function updateSlidePosition() {
+            slidesContainer.style.transform = `translateX(-${currentSlide * 100}vw)`;
+            handleVideoAutoplay();
+            handleWarningPopUp();
+        }
+
+        function goToNextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateSlidePosition();
+            }
+        }
+
+        function goToPrevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlidePosition();
+            }
+        }
+
+        function handleVideoAutoplay() {
+            document.querySelectorAll('video').forEach(video => {
+                video.pause();
+                video.currentTime = 0;
+            });
+
+            const current = slides[currentSlide];
+            const videos = current.querySelectorAll('video');
+
+            videos.forEach(video => {
+                video.play();
+            });
+        }
+
+        function handleWarningPopUp() {
+            document.querySelectorAll('.warning h2').forEach(text => {
+                text.style.visibility = 'hidden';
+                text.classList.remove('pop-up');
+            });
+
+            const current = slides[currentSlide];
+            if (current.classList.contains('warning')) {
+                setTimeout(() => {
+                    const warningText = current.querySelector('h2');
+                    warningText.style.visibility = 'visible';
+                    warningText.classList.add('pop-up');
+                    current.classList.add('is-animated');
+                    setTimeout(() => current.classList.remove('is-animated'), 2600);
+                }, 400);
+            }
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch((err) => console.log(`Error attempting to enable full-screen mode: ${err.message}`));
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') goToNextSlide();
+            else if (e.key === 'ArrowLeft') goToPrevSlide();
+            else if (e.key === 'f') toggleFullscreen();
+        });
+
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].clientX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const swipeDistance = touchEndX - touchStartX;
+            if (swipeDistance > 50) goToPrevSlide();
+            else if (swipeDistance < -50) goToNextSlide();
+        }
+
+        updateSlidePosition();
+    </script>
+</body>
+
+</html>
