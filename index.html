@@ -19,6 +19,27 @@
             --hover-bg: #000000;
             --hover-fg: #ffffff;
             --paper: #f9f7f5; /* Faint paper tint for content area */
+            --subtle-bg: #f4f4f4;
+            --subtle-border: #e0e0e0;
+            --subtle-bg-2: #f0f0f0;
+            --error-bg: #fff0f0;
+            --error-text: red;
+        }
+
+        /* Dark Mode Variables */
+        [data-theme="dark"] {
+            --bg: #0a0a0a;
+            --fg: #ffffff;
+            --muted: #aaaaaa;
+            --border: #ffffff;
+            --hover-bg: #ffffff;
+            --hover-fg: #000000;
+            --paper: #111111;
+            --subtle-bg: #1a1a1a;
+            --subtle-border: #333333;
+            --subtle-bg-2: #1a1a1a;
+            --error-bg: #2a0000;
+            --error-text: #ff4d4d;
         }
 
         * {
@@ -37,6 +58,7 @@
             display: flex;
             height: 100vh;
             overflow: hidden;
+            transition: background 0.2s ease, color 0.2s ease;
         }
 
         /* --- LAYOUT --- */
@@ -48,14 +70,16 @@
             flex-shrink: 0;
             background: var(--bg);
             z-index: 10;
+            transition: background 0.2s ease, border 0.2s ease;
         }
 
-        /* New wrapper to hold the main area and the crosshairs */
+        /* New wrapper to hold the main area, crosshairs, and toggle */
         .main-wrapper {
             flex-grow: 1;
             position: relative;
             background: var(--bg);
             overflow: hidden; /* Prevents crosshairs from causing page scroll */
+            transition: background 0.2s ease;
         }
 
         .main {
@@ -64,6 +88,7 @@
             overflow-y: auto;
             position: relative;
             background: var(--bg);
+            transition: background 0.2s ease;
         }
 
         /* Crosshair decorations for the drafting aesthetic */
@@ -73,6 +98,7 @@
             height: 16px;
             pointer-events: none;
             z-index: 10; /* Keeps them above the scrolling text */
+            transition: background 0.2s ease;
         }
         .crosshair::before, .crosshair::after {
             content: '';
@@ -86,10 +112,34 @@
         .ch-bl { bottom: 24px; left: 24px; }
         .ch-br { bottom: 24px; right: 24px; }
 
+        /* Dark Mode Toggle */
+        .theme-toggle {
+            position: absolute;
+            top: 18px;
+            right: 56px; /* Offset so it doesn't overlap the crosshair */
+            z-index: 20;
+            padding: 8px 12px;
+            border: 2px solid var(--border);
+            background: var(--bg);
+            color: var(--fg);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            letter-spacing: 0.05em;
+            transition: background 0.1s, color 0.1s, border 0.2s;
+        }
+        .theme-toggle:hover {
+            background: var(--fg);
+            color: var(--bg);
+        }
+
         /* --- SIDEBAR --- */
         .sidebar-header {
             padding: 32px 24px;
             border-bottom: 2px solid var(--border);
+            transition: border 0.2s ease;
         }
 
         .sidebar-header h1 {
@@ -107,6 +157,7 @@
             margin-top: 12px;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            transition: color 0.2s ease;
         }
 
         .nav-list {
@@ -115,7 +166,8 @@
         }
 
         .nav-item {
-            border-bottom: 1px solid #e0e0e0;
+            border-bottom: 1px solid var(--subtle-border);
+            transition: border 0.2s ease;
         }
 
         .nav-link {
@@ -157,6 +209,7 @@
             color: var(--muted);
             line-height: 1.8;
             text-transform: uppercase;
+            transition: border 0.2s ease, color 0.2s ease;
         }
 
         /* --- MAIN CONTENT --- */
@@ -180,6 +233,7 @@
             justify-content: space-between;
             align-items: baseline;
             letter-spacing: -0.02em;
+            transition: border 0.2s ease;
         }
 
         .section-title .meta {
@@ -194,8 +248,8 @@
         .module {
             border: 2px solid var(--border);
             margin-bottom: 32px;
-            transition: transform 0.15s, box-shadow 0.15s;
-            background: #fff;
+            transition: transform 0.15s, box-shadow 0.15s, border 0.2s, background 0.2s;
+            background: var(--bg);
         }
 
         .module:hover {
@@ -209,7 +263,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #f4f4f4;
+            background: var(--subtle-bg);
+            transition: border 0.2s ease, background 0.2s ease;
         }
 
         .module-title {
@@ -224,7 +279,8 @@
             border: 1px solid var(--border);
             padding: 4px 8px;
             text-transform: uppercase;
-            background: #fff;
+            background: var(--bg);
+            transition: border 0.2s, background 0.2s;
         }
 
         .module-body {
@@ -232,7 +288,8 @@
             font-family: 'Spectral', serif;
             font-size: 1.1rem;
             line-height: 1.7;
-            color: #222;
+            color: var(--fg);
+            opacity: 0.9;
         }
 
         .module-link {
@@ -245,7 +302,7 @@
             font-size: 0.85rem;
             font-weight: 700;
             text-transform: uppercase;
-            transition: background 0.1s;
+            transition: background 0.1s, color 0.1s;
         }
 
         .module-link:hover {
@@ -258,16 +315,18 @@
             border: 2px solid var(--border);
             margin-bottom: 48px;
             position: relative;
+            transition: border 0.2s ease;
         }
 
         .log-header {
             padding: 16px 24px;
             border-bottom: 2px solid var(--border);
-            background: #000;
-            color: #fff;
+            background: var(--fg);
+            color: var(--bg);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: background 0.2s, border 0.2s, color 0.2s;
         }
 
         .log-header h3 {
@@ -305,11 +364,13 @@
             font-family: 'Space Mono', monospace;
             font-size: 1rem;
             outline: none;
-            background: #fff;
+            background: var(--bg);
+            color: var(--fg);
+            transition: border 0.2s, background 0.2s;
         }
 
         .admin-panel input:focus, .admin-panel textarea:focus {
-            background: #f0f0f0;
+            background: var(--subtle-bg-2);
             box-shadow: 4px 4px 0 var(--border);
         }
 
@@ -317,6 +378,7 @@
             padding: 16px 32px;
             background: var(--bg);
             border: 2px solid var(--border);
+            color: var(--fg);
             font-family: 'Space Grotesk', sans-serif;
             font-weight: 700;
             font-size: 1rem;
@@ -365,11 +427,11 @@
             .nav-list {
                 display: flex;
                 overflow-x: auto;
-                border-bottom: 1px solid #eee;
+                border-bottom: 1px solid var(--subtle-border);
             }
             .nav-item {
                 border-bottom: none;
-                border-right: 1px solid #e0e0e0;
+                border-right: 1px solid var(--subtle-border);
                 flex-shrink: 0;
             }
             .nav-link {
@@ -390,6 +452,11 @@
                 font-size: 1.8rem;
             }
             .crosshair { display: none; }
+            .theme-toggle { 
+                top: 14px; 
+                right: 16px; 
+                z-index: 30;
+            }
         }
     </style>
 </head>
@@ -424,6 +491,9 @@
         <div class="crosshair ch-tr"></div>
         <div class="crosshair ch-bl"></div>
         <div class="crosshair ch-br"></div>
+
+        <!-- Dark Mode Toggle -->
+        <button id="theme-toggle" class="theme-toggle">DARK</button>
 
         <main class="main">
             <div class="content-container" id="app">
@@ -477,13 +547,13 @@
                     <p style="margin-bottom: 24px;">I build tools that sit between abstract logic and visual output. From emulators made of shapes to AI workbenches that simplify complexity.</p>
                     <p>Use the modules on the left to navigate the system.</p>
                 </div>
-                <div style="margin-top: 64px; border-top: 2px solid black; padding-top: 24px;">
+                <div style="margin-top: 64px; border-top: 2px solid var(--border); padding-top: 24px;">
                     <p style="font-family: 'Space Mono', monospace; font-size: 0.9rem; margin-bottom: 16px; text-transform: uppercase;">Subsystems:</p>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-family: 'Space Mono', monospace; font-size: 0.9rem;">
-                        <div style="border: 1px solid #ccc; padding: 16px;">CODING<br><span style="color:#555; font-size:0.8rem;">TS / JS / PY</span></div>
-                        <div style="border: 1px solid #ccc; padding: 16px;">PIANO<br><span style="color:#555; font-size:0.8rem;">GRADE 8 ABRSM</span></div>
-                        <div style="border: 1px solid #ccc; padding: 16px;">CALLIGRAPHY<br><span style="color:#555; font-size:0.8rem;">JAPANESE</span></div>
-                        <div style="border: 1px solid #ccc; padding: 16px;">LANGUAGES<br><span style="color:#555; font-size:0.8rem;">ENGLISH</span></div>
+                        <div style="border: 1px solid var(--subtle-border); padding: 16px;">CODING<br><span style="color: var(--muted); font-size:0.8rem;">TS / JS / PY</span></div>
+                        <div style="border: 1px solid var(--subtle-border); padding: 16px;">PIANO<br><span style="color: var(--muted); font-size:0.8rem;">GRADE 8 ABRSM</span></div>
+                        <div style="border: 1px solid var(--subtle-border); padding: 16px;">CALLIGRAPHY<br><span style="color: var(--muted); font-size:0.8rem;">JAPANESE</span></div>
+                        <div style="border: 1px solid var(--subtle-border); padding: 16px;">LANGUAGES<br><span style="color: var(--muted); font-size:0.8rem;">ENGLISH</span></div>
                     </div>
                 </div>
             `;
@@ -546,20 +616,20 @@
                 <div class="section-title">
                     <span>Research</span>
                 </div>
-                <div style="border: 2px solid black; padding: 32px; background: #f9f7f5;">
+                <div style="border: 2px solid var(--border); padding: 32px; background: var(--paper);">
                     <p style="font-family: 'Spectral', serif; font-size: 1.2rem; margin-bottom: 16px; font-weight: 600;">
                         Question: Among pregnant women receiving maternal healthcare in Bangladesh, can survey-based proxies achieve comparable predictive value to clinical vitals for maternal risk stratification?
                     </p>
-                    <p style="font-family: 'Spectral', serif; font-size: 1rem; color: #444; font-style: italic;">
+                    <p style="font-family: 'Spectral', serif; font-size: 1rem; color: var(--muted); font-style: italic;">
                         A comparison between UCI Maternal Health Risk dataset and BDHS 2022 dataset.
                     </p>
                 </div>
                 <div style="margin-top: 48px;">
                     <p style="font-family: 'Space Mono', monospace; font-size: 0.9rem; margin-bottom: 16px; text-transform: uppercase;">Experience Log:</p>
                     <ul style="list-style: none; font-family: 'Spectral', serif; font-size: 1.1rem;">
-                        <li style="border-bottom: 1px solid #ccc; padding: 12px 0; display: flex; justify-content: space-between;"><span>Tokyo Open Data Hackathon</span> <span style="font-family:'Space Mono'; font-size:0.8rem; color:#555;">PARTICIPANT</span></li>
-                        <li style="border-bottom: 1px solid #ccc; padding: 12px 0; display: flex; justify-content: space-between;"><span>Hack Club YSWS "Crescent"</span> <span style="font-family:'Space Mono'; font-size:0.8rem; color:#555;">REVIEWER</span></li>
-                        <li style="padding: 12px 0; display: flex; justify-content: space-between;"><span>Claro.AI</span> <span style="font-family:'Space Mono'; font-size:0.8rem; color:#555;">PROJECT LEAD</span></li>
+                        <li style="border-bottom: 1px solid var(--subtle-border); padding: 12px 0; display: flex; justify-content: space-between;"><span>Tokyo Open Data Hackathon</span> <span style="font-family:'Space Mono'; font-size:0.8rem; color: var(--muted);">PARTICIPANT</span></li>
+                        <li style="border-bottom: 1px solid var(--subtle-border); padding: 12px 0; display: flex; justify-content: space-between;"><span>Hack Club YSWS "Crescent"</span> <span style="font-family:'Space Mono'; font-size:0.8rem; color: var(--muted);">REVIEWER</span></li>
+                        <li style="padding: 12px 0; display: flex; justify-content: space-between;"><span>Claro.AI</span> <span style="font-family:'Space Mono'; font-size:0.8rem; color: var(--muted);">PROJECT LEAD</span></li>
                     </ul>
                 </div>
             `;
@@ -573,7 +643,7 @@
                     <span>Log Entries</span>
                 </div>
                 <div id="postList">
-                    <p style="font-family: 'Spectral', serif; font-size: 1.2rem; color: #555;">FETCHING TRANSMISSIONS...</p>
+                    <p style="font-family: 'Spectral', serif; font-size: 1.2rem; color: var(--muted);">FETCHING TRANSMISSIONS...</p>
                 </div>
             `;
             
@@ -599,7 +669,7 @@
             `;
 
             if (posts.length === 0) {
-                html += `<p style="font-family: 'Spectral', serif; font-size: 1.2rem; color: #555;">No transmissions yet. Check back later.</p>`;
+                html += `<p style="font-family: 'Spectral', serif; font-size: 1.2rem; color: var(--muted);">No transmissions yet. Check back later.</p>`;
             } else {
                 posts.forEach((post, index) => {
                     html += `
@@ -675,8 +745,8 @@ Use \n for new lines.
                     
                     <div id="jsonOutputContainer" style="display:none; margin-top: 24px;">
                         <label style="font-family: 'Space Mono', monospace; font-size: 0.8rem; text-transform: uppercase; display:block; margin-bottom: 8px;">Copy this to posts.json:</label>
-                        <textarea id="jsonOutput" rows="8" style="background: #f0f0f0;" readonly></textarea>
-                        <p style="font-family: 'Space Mono', monospace; font-size: 0.75rem; color: #555; margin-top: 8px;">> INSTRUCTIONS: Copy the above text. Open posts.json in your GitHub repo, paste this inside the brackets [ ], and commit. Separate multiple posts with a comma.</p>
+                        <textarea id="jsonOutput" rows="8" style="background: var(--subtle-bg-2);" readonly></textarea>
+                        <p style="font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--muted); margin-top: 8px;">> INSTRUCTIONS: Copy the above text. Open posts.json in your GitHub repo, paste this inside the brackets [ ], and commit. Separate multiple posts with a comma.</p>
                     </div>
                 </div>
             `;
@@ -716,6 +786,29 @@ Use \n for new lines.
             div.innerHTML = html;
             return div.textContent || '';
         }
+
+        // --- DARK MODE LOGIC ---
+        const themeToggle = document.getElementById('theme-toggle');
+        
+        // Apply saved theme on load
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            themeToggle.innerText = 'LIGHT';
+        } else {
+            themeToggle.innerText = 'DARK';
+        }
+
+        themeToggle.addEventListener('click', () => {
+            if (document.documentElement.getAttribute('data-theme') === 'dark') {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+                themeToggle.innerText = 'DARK';
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                themeToggle.innerText = 'LIGHT';
+            }
+        });
 
         // --- INIT ---
         // Secret key sequence to access admin: "admin"
