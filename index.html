@@ -59,10 +59,11 @@
 
         /* Crosshair decorations for the drafting aesthetic */
         .crosshair {
-            position: absolute;
+            position: fixed; /* Changed to fixed so they don't scroll */
             width: 16px;
             height: 16px;
             pointer-events: none;
+            z-index: 5; /* Keeps them above the scrolling content */
         }
         .crosshair::before, .crosshair::after {
             content: '';
@@ -71,9 +72,11 @@
         }
         .crosshair::before { width: 100%; height: 1px; top: 50%; left: 0; }
         .crosshair::after { width: 1px; height: 100%; left: 50%; top: 0; }
-        .ch-tl { top: 24px; left: 24px; }
+        
+        /* Added 320px (sidebar width) + 24px (margin) to the left corners */
+        .ch-tl { top: 24px; left: calc(320px + 24px); }
         .ch-tr { top: 24px; right: 24px; }
-        .ch-bl { bottom: 24px; left: 24px; }
+        .ch-bl { bottom: 24px; left: calc(320px + 24px); }
         .ch-br { bottom: 24px; right: 24px; }
 
         /* --- SIDEBAR --- */
