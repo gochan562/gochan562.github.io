@@ -50,8 +50,17 @@
             z-index: 10;
         }
 
-        .main {
+        /* New wrapper to hold the main area and the crosshairs */
+        .main-wrapper {
             flex-grow: 1;
+            position: relative;
+            background: var(--bg);
+            overflow: hidden; /* Prevents crosshairs from causing page scroll */
+        }
+
+        .main {
+            width: 100%;
+            height: 100%;
             overflow-y: auto;
             position: relative;
             background: var(--bg);
@@ -59,11 +68,11 @@
 
         /* Crosshair decorations for the drafting aesthetic */
         .crosshair {
-            position: fixed; /* Changed to fixed so they don't scroll */
+            position: absolute; /* Absolute relative to .main-wrapper */
             width: 16px;
             height: 16px;
             pointer-events: none;
-            z-index: 5; /* Keeps them above the scrolling content */
+            z-index: 10; /* Keeps them above the scrolling text */
         }
         .crosshair::before, .crosshair::after {
             content: '';
@@ -72,11 +81,9 @@
         }
         .crosshair::before { width: 100%; height: 1px; top: 50%; left: 0; }
         .crosshair::after { width: 1px; height: 100%; left: 50%; top: 0; }
-        
-        /* Added 320px (sidebar width) + 24px (margin) to the left corners */
-        .ch-tl { top: 24px; left: calc(320px + 24px); }
+        .ch-tl { top: 24px; left: 24px; }
         .ch-tr { top: 24px; right: 24px; }
-        .ch-bl { bottom: 24px; left: calc(320px + 24px); }
+        .ch-bl { bottom: 24px; left: 24px; }
         .ch-br { bottom: 24px; right: 24px; }
 
         /* --- SIDEBAR --- */
@@ -372,7 +379,8 @@
             .nav-link:hover, .nav-link.active {
                 padding-left: 16px;
             }
-            .main {
+            .main-wrapper {
+                width: 100%;
                 height: calc(100vh - 160px); /* Adjust based on sidebar height */
             }
             .content-container {
@@ -410,16 +418,19 @@
     </aside>
 
     <!-- MAIN CONTENT AREA -->
-    <main class="main">
+    <div class="main-wrapper">
+        <!-- Crosshairs are now outside the scrolling main area -->
         <div class="crosshair ch-tl"></div>
         <div class="crosshair ch-tr"></div>
         <div class="crosshair ch-bl"></div>
         <div class="crosshair ch-br"></div>
 
-        <div class="content-container" id="app">
-            <!-- Content injected here -->
-        </div>
-    </main>
+        <main class="main">
+            <div class="content-container" id="app">
+                <!-- Content injected here -->
+            </div>
+        </main>
+    </div>
 
     <script>
         // --- STATE & ROUTING ---
