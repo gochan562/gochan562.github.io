@@ -1,5 +1,7 @@
 [
-  "title": "I made a personal website!!!",
+  {
+    "title": "I made a personal website!!!",
     "content": "#Test\n\nYay first blog for the website!",
     "date": "2026-10-25"
+  }
 ]
