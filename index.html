@@ -1,385 +1,726 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <title>てんゆは天災だああ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Andrew Wu // Workbench</title>
+
+    <!-- Niche Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
     <style>
+        :root {
+            --bg: #ffffff;
+            --fg: #000000;
+            --muted: #555555;
+            --border: #000000;
+            --hover-bg: #000000;
+            --hover-fg: #ffffff;
+            --paper: #f9f7f5; /* Faint paper tint for content area */
+        }
+
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+            border-radius: 0 !important; /* STRICT: No rounded corners */
         }
 
         body {
-            font-family: Arial, sans-serif;
-            overflow: hidden;
-            background-color: #111;
-        }
-
-        .slideshow-container {
+            background-color: var(--bg);
+            color: var(--fg);
+            font-family: 'Spectral', serif;
+            font-size: 16px;
+            line-height: 1.6;
             display: flex;
-            width: 100vw;
             height: 100vh;
             overflow: hidden;
+        }
+
+        /* --- LAYOUT --- */
+        .sidebar {
+            width: 320px;
+            border-right: 2px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            background: var(--bg);
+            z-index: 10;
+        }
+
+        .main {
+            flex-grow: 1;
+            overflow-y: auto;
             position: relative;
+            background: var(--bg);
         }
 
-        .slides {
-            display: flex;
-            transition: transform 0.5s ease;
-            width: 100%;
+        /* Crosshair decorations for the drafting aesthetic */
+        .crosshair {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            pointer-events: none;
+        }
+        .crosshair::before, .crosshair::after {
+            content: '';
+            position: absolute;
+            background: var(--fg);
+        }
+        .crosshair::before { width: 100%; height: 1px; top: 50%; left: 0; }
+        .crosshair::after { width: 1px; height: 100%; left: 50%; top: 0; }
+        .ch-tl { top: 24px; left: 24px; }
+        .ch-tr { top: 24px; right: 24px; }
+        .ch-bl { bottom: 24px; left: 24px; }
+        .ch-br { bottom: 24px; right: 24px; }
+
+        /* --- SIDEBAR --- */
+        .sidebar-header {
+            padding: 32px 24px;
+            border-bottom: 2px solid var(--border);
         }
 
-        .slide {
-            min-width: 100vw;
-            height: 100vh;
+        .sidebar-header h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1;
+        }
+
+        .sidebar-header .subtitle {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-top: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .nav-list {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .nav-link {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            color: white;
-            background-color: #333;
+            padding: 20px 24px;
+            text-decoration: none;
+            color: var(--fg);
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 500;
+            font-size: 1.25rem;
+            transition: background 0.1s ease-out, color 0.1s ease-out, padding 0.1s ease-out;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: var(--hover-bg);
+            color: var(--hover-fg);
+            padding-left: 32px; /* Shift right on hover */
+        }
+
+        /* Flicker only when hovered, for 3 cycles */
+        .nav-link:hover {
+            animation: nav-flicker 0.16s step-end 2;
+        }
+
+        .nav-link span {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 400;
+            opacity: 0.7;
+        }
+
+        .sidebar-footer {
+            padding: 24px;
+            border-top: 2px solid var(--border);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--muted);
+            line-height: 1.8;
+            text-transform: uppercase;
+        }
+
+        /* --- MAIN CONTENT --- */
+        .content-container {
+            padding: 64px 48px;
+            max-width: 850px;
+            margin: 0 auto;
             position: relative;
-            font-size: 50px;
+            min-height: 100%;
         }
 
-        /* Special font size for 1st and 4th slide */
-        .slide:nth-child(1),
-        .slide:nth-child(4) {
-            font-size: 150px;
-            background-color: #444;
+        .section-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 16px;
+            margin-bottom: 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            letter-spacing: -0.02em;
         }
 
-        img,
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
+        .section-title .meta {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: var(--muted);
+            text-transform: uppercase;
         }
 
-        .video-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(2, 1fr);
-            gap: 20px;
-            width: 90%;
-            height: 90%;
+        /* --- MODULES (Projects) --- */
+        .module {
+            border: 2px solid var(--border);
+            margin-bottom: 32px;
+            transition: transform 0.15s, box-shadow 0.15s;
+            background: #fff;
         }
 
-        .video-container iframe:nth-child(3) {
-            grid-column: span 2;
+        .module:hover {
+            box-shadow: 6px 6px 0 var(--border); /* Hard offset shadow */
+            transform: translate(-2px, -2px);
         }
 
-        /* Background video style for slide 10 */
-        .background-video-slide {
+        .module-header {
+            padding: 16px 24px;
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f4f4f4;
+        }
+
+        .module-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1.3rem;
+        }
+
+        .module-tag {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            border: 1px solid var(--border);
+            padding: 4px 8px;
+            text-transform: uppercase;
+            background: #fff;
+        }
+
+        .module-body {
+            padding: 32px;
+            font-family: 'Spectral', serif;
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: #222;
+        }
+
+        .module-link {
+            display: block;
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            text-decoration: none;
+            color: var(--fg);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            transition: background 0.1s;
+        }
+
+        .module-link:hover {
+            background: var(--fg);
+            color: var(--bg);
+        }
+
+        /* --- LOG (Blog) --- */
+        .log-entry {
+            border: 2px solid var(--border);
+            margin-bottom: 48px;
             position: relative;
+        }
+
+        .log-header {
+            padding: 16px 24px;
+            border-bottom: 2px solid var(--border);
+            background: #000;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .log-header h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .log-date {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+        }
+
+        .log-content {
+            padding: 32px;
+            font-family: 'Spectral', serif;
+            font-size: 1.15rem;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            min-height: 150px;
+        }
+
+        /* --- ADMIN --- */
+        .admin-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .admin-panel input, .admin-panel textarea {
             width: 100%;
-            height: 100vh; /* Ensure it takes full viewport height */
-            overflow: hidden;
+            padding: 16px;
+            border: 2px solid var(--border);
+            font-family: 'Space Mono', monospace;
+            font-size: 1rem;
+            outline: none;
+            background: #fff;
         }
 
-        .background-video-slide iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* Make sure the video fills the screen */
-            z-index: 0;
+        .admin-panel input:focus, .admin-panel textarea:focus {
+            background: #f0f0f0;
+            box-shadow: 4px 4px 0 var(--border);
         }
 
-        .background-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 2304px ;
-            height: 2765px;
-            background: rgba(0, 0, 0, 0.4); /* Darker overlay */
-            z-index: 1;
+        .admin-panel button {
+            padding: 16px 32px;
+            background: var(--bg);
+            border: 2px solid var(--border);
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.1s;
+            align-self: flex-start;
         }
 
-        .background-video-slide .content.overlay-content {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 2;
-            text-align: center;
-            color: white;
-            font-size: 80px;
-            font-weight: bold;
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7); /* Optional: Add text shadow for better visibility */
+        .admin-panel button:hover {
+            background: var(--fg);
+            color: var(--bg);
+            box-shadow: 4px 4px 0 var(--border);
         }
 
-        /* New slide 9 style with background image */
-        .background-image-slide {
-            position: relative;
-            overflow: hidden;
+        /* Cursor for typing effect */
+        .cursor::after {
+            content: '▋';
+            animation: blink 1s step-end infinite;
+            margin-left: 2px;
+            font-weight: normal;
         }
 
-        .background-image-slide .background-image {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: 0;
+        @keyframes blink {
+            50% { opacity: 0; }
         }
 
-        .background-image-slide .background-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.3);
-            z-index: 1;
+        @keyframes nav-flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.86; }
         }
 
-        .background-image-slide .content {
-            position: relative;
-            z-index: 2;
-            font-size: 50px;
-            text-align: center;
-            color: white;
-            top: -100px;
-        }
-
-        .activity-list {
-            list-style-type: none;
-            padding-left: 0;
-            text-align: left;
-        }
-
-        /* Pop-up animation for the warning slide */
-        .warning h2 {
-            animation: none;
-            visibility: hidden;
-            font-size: 72px;
-        }
-
-        .warning.pop-up h2 {
-            animation: popUp 0.5s forwards;
-            background-color: yellow;
-            color: black;
-        }
-
-        @keyframes popUp {
-            0% {
-                transform: scale(0);
-                opacity: 0;
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
             }
-
-            100% {
-                transform: scale(1);
-                opacity: 1;
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 2px solid var(--border);
+                position: relative;
+                z-index: 20;
             }
-        }
-
-        /* Background animation provided by the user */
-        .bg .bg-wrap {
-            position: relative;
-            display: inline-block;
-            margin-top: 5px;
-        }
-
-        .bg.is-animated .bg-wrap::before {
-            animation: bg 2.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-            background: linear-gradient(to right, #FFFF00 0%, #FFFF00 50%, #FFFF00 100%);
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            transform-origin: left center;
-        }
-
-        .bg .bg-wrap .inn {
-            color: red;
-            display: inline-block;
-            font-size: 70px;
-            font-weight: bold;
-            padding: 5px 15px;
-            position: relative;
-            z-index: 1;
-        }
-
-        @keyframes bg {
-            0% {
-                opacity: 0;
-                transform: scaleX(0) translateX(-5%);
+            .nav-list {
+                display: flex;
+                overflow-x: auto;
+                border-bottom: 1px solid #eee;
             }
-
-            30% {
-                transform: scaleX(1) translateX(0);
+            .nav-item {
+                border-bottom: none;
+                border-right: 1px solid #e0e0e0;
+                flex-shrink: 0;
             }
-
-            100% {
-                transform: scaleX(1) translateX(0);
+            .nav-link {
+                padding: 16px;
+                font-size: 1rem;
             }
-
-            30%,
-            100% {
-                opacity: 1;
+            .nav-link:hover, .nav-link.active {
+                padding-left: 16px;
             }
-        }
-
-        /* Position the "davinci resolve 19" text */
-        .video-container p {
-            position: absolute;
-            bottom: 150px;
-            right: 180px;
-            text-align: center;
-            color: white;
-            font-size: 70px;
-            background-color: rgba(0, 0, 0, 0.5);
-            padding: 5px 10px;
+            .main {
+                height: calc(100vh - 160px); /* Adjust based on sidebar height */
+            }
+            .content-container {
+                padding: 32px 24px;
+            }
+            .section-title {
+                font-size: 1.8rem;
+            }
+            .crosshair { display: none; }
         }
     </style>
 </head>
-
 <body>
-    <div class="slideshow-container">
-        <div class="slides">
-            <div class="slide">パソコン部　紹介</div>
-            <div class="slide"><img src="https://iili.io/3FxNJj9.jpg" alt="Slide 2"></div>
-            <div class="slide"><img src="https://iili.io/3FxN3Cu.jpg" alt="Slide 3"></div>
-            <div class="slide"><h2>活動内容</h2></div>
-            <div class="slide">小説作り <iframe id="AIwrite" src="https://player.vimeo.com/video/1063990822?h=205c33b6d9&amp;title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&autoplay=1&controls=0&loop=1&muted=1" width="785" height="402" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" title="rpreplay-final1741510702_wzM8rXOl"></iframe></div>
-            <div class="slide"><iframe id="othello" src="https://player.vimeo.com/video/1063794728?h=9d2fc807ac&title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&controls=0&loop=1&muted=1" width="632.8" height="439.2" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" title="rpreplay-final1741414254_S0Xg4x1m"></iframe>ボードゲーム</div>
-            <div class="slide">プログラミング<br>卒業生作→</br><iframe src="https://player.vimeo.com/video/1063765680?h=192aa8ac05&amp;title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&autoplay=1&controls=0&loop=1&muted=1" width="624" height="390" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" title="video"></iframe></div>
-            <div class="slide"><h2>動画制作</h2></div>
-            <div class="slide">
-                <div class="video-container">
-                    <iframe src="https://player.vimeo.com/video/1063768315?h=6662753f68&amp;title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&autoplay=1&controls=0&loop=1&muted=1" width="480" height="268" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" title="RPReplay_Final1741242989"></iframe>
-                    <iframe src="https://player.vimeo.com/video/1064486902?h=2fa81dfb8d&amp;title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&autoplay=1&controls=0&loop=1&muted=1" width="480" height="270" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" title="ふじなみわーるど"></iframe>
-                    <iframe src="https://player.vimeo.com/video/1064577507?h=c16500616d&amp;title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&autoplay=1&controls=0&loop=1&muted=1" width="480" height="270" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" title="私のｂ"></iframe>
-                    <p>davinci resolve 19</p>
-                </div>
-            </div>
-            <div class="slide background-image-slide">
-                <img src="https://iili.io/3fUfGN2.jpg" alt="Slide 9" class="background-image">
-                <div class="background-overlay"></div>
-                <div class="content">
-                    <h2>部活情報</h2>
-                    <h3>———————————</h3>
-                    <ul class="activity-list">
-                        <li>・場所：5階メディアセンター</li>
-                        <li>・日にち：毎週火曜日</li>
-                        <li>・時間：放課後5時まで</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="warning slide bg">
-                <span class="bg-wrap"><h2 class="inn">ゲームはしません！！</h2></span>
-            </div>
-            <!-- Slide 12 - Background Video with Text Overlay -->
-            <div class="slide background-video-slide">
-                <div class="background-overlay"></div>
-                <iframe src="https://player.vimeo.com/video/1067662927?h=222a7dbc2a&amp;title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&autoplay=1&controls=0&loop=1&muted=1" width="2304" height="1294" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" title="RPReplay_Final1742462449-ezgif.com-video-speed"></iframe>
-                <div class="content overlay-content">
-                    <h2>終わり</h2>
-                </div>
-            </div>
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h1>Andrew Wu</h1>
+            <div class="subtitle">call sign: Gochan_562</div>
         </div>
-    </div>
+        <ul class="nav-list" id="navList">
+            <li class="nav-item">
+                <a href="#home" class="nav-link" data-route="home">HOME</a>
+            </li>
+            <li class="nav-item">
+                <a href="#projects" class="nav-link" data-route="projects">PROJECTS</a>
+            </li>
+            <li class="nav-item">
+                <a href="#research" class="nav-link" data-route="research">RESEARCH</a>
+            </li>
+            <li class="nav-item">
+                <a href="#blog" class="nav-link" data-route="blog">BLOG</a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="main">
+        <div class="crosshair ch-tl"></div>
+        <div class="crosshair ch-tr"></div>
+        <div class="crosshair ch-bl"></div>
+        <div class="crosshair ch-br"></div>
+
+        <div class="content-container" id="app">
+            <!-- Content injected here -->
+        </div>
+    </main>
 
     <script>
-        let currentSlide = 0;
-        const slidesContainer = document.querySelector('.slides');
-        const slides = document.querySelectorAll('.slide');
-        const totalSlides = slides.length;
+        // --- STATE & ROUTING ---
+        const app = document.getElementById('app');
 
-        function updateSlidePosition() {
-            slidesContainer.style.transform = `translateX(-${currentSlide * 100}vw)`;
-            handleVideoAutoplay();
-            handleWarningPopUp();
-        }
+        const routes = {
+            home: renderHome,
+            projects: renderProjects,
+            research: renderResearch,
+            blog: renderBlog,
+            admin: renderAdmin
+        };
 
-        function goToNextSlide() {
-            if (currentSlide < totalSlides - 1) {
-                currentSlide++;
-                updateSlidePosition();
-            }
-        }
+        function router() {
+            const hash = window.location.hash.substring(1) || 'home';
+            const routeFunction = routes[hash] || routes.home;
 
-        function goToPrevSlide() {
-            if (currentSlide > 0) {
-                currentSlide--;
-                updateSlidePosition();
-            }
-        }
-
-        function handleVideoAutoplay() {
-            document.querySelectorAll('video').forEach(video => {
-                video.pause();
-                video.currentTime = 0;
+            // Update active nav
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.dataset.route === hash) {
+                    link.classList.add('active');
+                }
             });
 
-            const current = slides[currentSlide];
-            const videos = current.querySelectorAll('video');
+            // Render
+            routeFunction();
 
-            videos.forEach(video => {
-                video.play();
-            });
+            // Scroll to top on route change
+            document.querySelector('.main').scrollTop = 0;
         }
 
-        function handleWarningPopUp() {
-            document.querySelectorAll('.warning h2').forEach(text => {
-                text.style.visibility = 'hidden';
-                text.classList.remove('pop-up');
-            });
+        window.addEventListener('hashchange', router);
 
-            const current = slides[currentSlide];
-            if (current.classList.contains('warning')) {
-                setTimeout(() => {
-                    const warningText = current.querySelector('h2');
-                    warningText.style.visibility = 'visible';
-                    warningText.classList.add('pop-up');
-                    current.classList.add('is-animated');
-                    setTimeout(() => current.classList.remove('is-animated'), 2600);
-                }, 400);
+        // --- VIEWS ---
+
+        function renderHome() {
+            app.innerHTML = `
+                <div class="section-title">
+                    <span>Home</span>
+                </div>
+                <div style="font-family: 'Spectral', serif; font-size: 1.3rem; line-height: 1.7; max-width: 600px;">
+                    <p style="margin-bottom: 24px;">This is the workbench of Andrew Wu. Student developer, researcher, and systems thinker.</p>
+                    <p style="margin-bottom: 24px;">I build tools that sit between abstract logic and visual output. From emulators made of shapes to AI workbenches that simplify complexity.</p>
+                    <p>Use the modules on the left to navigate the system.</p>
+                </div>
+                <div style="margin-top: 64px; border-top: 2px solid black; padding-top: 24px;">
+                    <p style="font-family: 'Space Mono', monospace; font-size: 0.9rem; margin-bottom: 16px; text-transform: uppercase;">Subsystems:</p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-family: 'Space Mono', monospace; font-size: 0.9rem;">
+                        <div style="border: 1px solid #ccc; padding: 16px;">CODING<br><span style="color:#555; font-size:0.8rem;">TS / JS / PY</span></div>
+                        <div style="border: 1px solid #ccc; padding: 16px;">PIANO<br><span style="color:#555; font-size:0.8rem;">GRADE 8 ABRSM</span></div>
+                        <div style="border: 1px solid #ccc; padding: 16px;">CALLIGRAPHY<br><span style="color:#555; font-size:0.8rem;">JAPANESE</span></div>
+                        <div style="border: 1px solid #ccc; padding: 16px;">LANGUAGES<br><span style="color:#555; font-size:0.8rem;">ENGLISH</span></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderProjects() {
+            app.innerHTML = `
+                <div class="section-title">
+                    <span>Projects</span>
+                </div>
+
+                <div class="module">
+                    <div class="module-header">
+                        <span class="module-title">Claro.AI</span>
+                        <span class="module-tag">AI / WORKBENCH</span>
+                    </div>
+                    <div class="module-body">
+                        A browser-based AI workbench for discovering Hugging Face models, building notebooks, running inference, and fine-tuning models without wiring together every piece of ML infrastructure by hand.
+                    </div>
+                    <a href="https://github.com/gochan562/Claro.AI" target="_blank" class="module-link">VIEW SOURCE -></a>
+                </div>
+
+                <div class="module">
+                    <div class="module-header">
+                        <span class="module-title">Shape Computer</span>
+                        <span class="module-tag">EMULATOR / VISUAL</span>
+                    </div>
+                    <div class="module-body">
+                        A computer emulator completely made out of 2D shape nodes. An experiment in reducing computation to its most visual, geometric primitives.
+                    </div>
+                    <a href="https://github.com/gochan562/Shape-Computer" target="_blank" class="module-link">VIEW SOURCE -></a>
+                </div>
+
+                <div class="module">
+                    <div class="module-header">
+                        <span class="module-title">Sonic Canvas</span>
+                        <span class="module-tag">AUDIO / VISUAL</span>
+                    </div>
+                    <div class="module-body">
+                        Turns a music file into an animated visual that reacts while the track plays. Features multiple scenes: Liquid, Orbit, Tunnel, Grid, and Particle Field. Exports to WebM.
+                    </div>
+                    <a href="https://github.com/gochan562/SonicCanvas" target="_blank" class="module-link">VIEW SOURCE -></a>
+                </div>
+
+                <div class="module">
+                    <div class="module-header">
+                        <span class="module-title">Mandelbrot Explorer</span>
+                        <span class="module-tag">FRACTAL / MATH</span>
+                    </div>
+                    <div class="module-body">
+                        A simple Mandelbrot / Julia fractal explorer. An exercise in infinite complexity rendered in finite pixels.
+                    </div>
+                    <a href="https://github.com/gochan562/fractal" target="_blank" class="module-link">VIEW SOURCE -></a>
+                </div>
+            `;
+        }
+
+        function renderResearch() {
+            app.innerHTML = `
+                <div class="section-title">
+                    <span>Research</span>
+                </div>
+                <div style="border: 2px solid black; padding: 32px; background: #f9f7f5;">
+                    <p style="font-family: 'Spectral', serif; font-size: 1.2rem; margin-bottom: 16px; font-weight: 600;">
+                        Question: Among pregnant women receiving maternal healthcare in Bangladesh, can survey-based proxies achieve comparable predictive value to clinical vitals for maternal risk stratification?
+                    </p>
+                    <p style="font-family: 'Spectral', serif; font-size: 1rem; color: #444; font-style: italic;">
+                        A comparison between UCI Maternal Health Risk dataset and BDHS 2022 dataset.
+                    </p>
+                </div>
+                <div style="margin-top: 48px;">
+                    <p style="font-family: 'Space Mono', monospace; font-size: 0.9rem; margin-bottom: 16px; text-transform: uppercase;">Experience Log:</p>
+                    <ul style="list-style: none; font-family: 'Spectral', serif; font-size: 1.1rem;">
+                        <li style="border-bottom: 1px solid #ccc; padding: 12px 0; display: flex; justify-content: space-between;"><span>Tokyo Open Data Hackathon</span> <span style="font-family:'Space Mono'; font-size:0.8rem; color:#555;">PARTICIPANT</span></li>
+                        <li style="border-bottom: 1px solid #ccc; padding: 12px 0; display: flex; justify-content: space-between;"><span>Hack Club YSWS "Crescent"</span> <span style="font-family:'Space Mono'; font-size:0.8rem; color:#555;">REVIEWER</span></li>
+                        <li style="padding: 12px 0; display: flex; justify-content: space-between;"><span>Claro.AI</span> <span style="font-family:'Space Mono'; font-size:0.8rem; color:#555;">PROJECT LEAD</span></li>
+                    </ul>
+                </div>
+            `;
+        }
+
+        // --- BLOG VIEW (Updated to fetch from GitHub) ---
+        async function renderBlog() {
+            let posts = [];
+            app.innerHTML = `
+                <div class="section-title">
+                    <span>Log Entries</span>
+                </div>
+                <div id="postList">
+                    <p style="font-family: 'Spectral', serif; font-size: 1.2rem; color: #555;">FETCHING TRANSMISSIONS...</p>
+                </div>
+            `;
+            
+            try {
+                // Attempt to fetch the global posts.json file
+                const response = await fetch('posts.json');
+                if (response.ok) {
+                    posts = await response.json();
+                } else {
+                    throw new Error('File not found');
+                }
+            } catch (e) {
+                // Fallback to localStorage if testing locally without the json file
+                console.log("Fetch failed, falling back to local storage");
+                posts = JSON.parse(localStorage.getItem('andrew_blog_posts') || '[]');
             }
-        }
 
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch((err) => console.log(`Error attempting to enable full-screen mode: ${err.message}`));
+            let html = `
+                <div class="section-title">
+                    <span>Log Entries</span>
+                </div>
+                <div id="postList">
+            `;
+
+            if (posts.length === 0) {
+                html += `<p style="font-family: 'Spectral', serif; font-size: 1.2rem; color: #555;">No transmissions yet. Check back later.</p>`;
             } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
+                posts.forEach((post, index) => {
+                    html += `
+                        <div class="log-entry">
+                            <div class="log-header">
+                                <h3>${escapeHtml(post.title)}</h3>
+                                <span class="log-date">${post.date}</span>
+                            </div>
+                            <div class="log-content" id="post-${index}" data-content="${escapeHtml(post.content)}"></div>
+                        </div>
+                    `;
+                });
+            }
+
+            html += `</div>`;
+            app.innerHTML = html;
+
+            // Initiate typing effect for the first post
+            if (posts.length > 0) {
+                typeOutPost(document.getElementById('post-0'));
+            }
+        }
+
+        function typeOutPost(element) {
+            const content = unescapeHtml(element.dataset.content);
+            element.innerHTML = ''; 
+            element.classList.add('cursor');
+
+            let i = 0;
+            const speed = 15; // ms per char
+
+            function type() {
+                if (i < content.length) {
+                    let char = content.charAt(i);
+                    if (char === '\n') {
+                        element.innerHTML += '<br>';
+                    } else {
+                        element.innerHTML += char;
+                    }
+                    i++;
+
+                    // Scroll the main area if content overflows while typing
+                    const main = document.querySelector('.main');
+                    main.scrollTop = main.scrollHeight;
+                    setTimeout(type, speed);
+                } else {
+                    element.classList.remove('cursor');
                 }
             }
+            type();
         }
 
+        // --- ADMIN VIEW (Updated to generate JSON for GitHub) ---
+        function renderAdmin() {
+            app.innerHTML = `
+                <div class="section-title">
+                    <span>Author Entry</span>
+                    <span class="meta">WRITE_MODE</span>
+                </div>
+                <div class="admin-panel">
+                    <div>
+                        <label style="font-family: 'Space Mono', monospace; font-size: 0.8rem; text-transform: uppercase; display:block; margin-bottom: 8px;">Title</label>
+                        <input type="text" id="postTitle" placeholder="Enter title...">
+                    </div>
+                    <div>
+                        <label style="font-family: 'Space Mono', monospace; font-size: 0.8rem; text-transform: uppercase; display:block; margin-bottom: 8px;">Content (Markdown-like)</label>
+                        <textarea id="postContent" rows="15" placeholder="Type your log entry here...
+
+Use \n for new lines.
+**This won't parse as bold, it will just type out the raw text.**"></textarea>
+                    </div>
+                    <button id="generateJsonBtn">GENERATE JSON SNIPPET</button>
+                    
+                    <div id="jsonOutputContainer" style="display:none; margin-top: 24px;">
+                        <label style="font-family: 'Space Mono', monospace; font-size: 0.8rem; text-transform: uppercase; display:block; margin-bottom: 8px;">Copy this to posts.json:</label>
+                        <textarea id="jsonOutput" rows="8" style="background: #f0f0f0;" readonly></textarea>
+                        <p style="font-family: 'Space Mono', monospace; font-size: 0.75rem; color: #555; margin-top: 8px;">> INSTRUCTIONS: Copy the above text. Open posts.json in your GitHub repo, paste this inside the brackets [ ], and commit. Separate multiple posts with a comma.</p>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('generateJsonBtn').addEventListener('click', () => {
+                const title = document.getElementById('postTitle').value;
+                const content = document.getElementById('postContent').value;
+
+                if (!title || !content) {
+                    alert('ERROR: Fields cannot be empty.');
+                    return;
+                }
+
+                const newPost = {
+                    title: title,
+                    content: content,
+                    date: new Date().toISOString().split('T')[0]
+                };
+
+                // Output as formatted JSON string
+                const jsonString = JSON.stringify(newPost, null, 4);
+                
+                document.getElementById('jsonOutput').value = jsonString;
+                document.getElementById('jsonOutputContainer').style.display = 'block';
+            });
+        }
+
+        // --- UTILITIES ---
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function unescapeHtml(html) {
+            const div = document.createElement('div');
+            div.innerHTML = html;
+            return div.textContent || '';
+        }
+
+        // --- INIT ---
+        // Secret key sequence to access admin: "admin"
+        let keyBuffer = '';
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowRight') goToNextSlide();
-            else if (e.key === 'ArrowLeft') goToPrevSlide();
-            else if (e.key === 'f') toggleFullscreen();
+            // Ignore keypresses if typing in an input field
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            keyBuffer += e.key.toLowerCase();
+            if (keyBuffer.length > 10) keyBuffer = keyBuffer.slice(-10);
+
+            if (keyBuffer.endsWith('admin')) {
+                window.location.hash = 'admin';
+                keyBuffer = '';
+            }
         });
 
-        let touchStartX = 0;
-        let touchEndX = 0;
-
-        document.addEventListener('touchstart', (e) => {
-            touchStartX = e.touches[0].clientX;
-        });
-
-        document.addEventListener('touchend', (e) => {
-            touchEndX = e.changedTouches[0].clientX;
-            handleSwipe();
-        });
-
-        function handleSwipe() {
-            const swipeDistance = touchEndX - touchStartX;
-            if (swipeDistance > 50) goToPrevSlide();
-            else if (swipeDistance < -50) goToNextSlide();
-        }
-
-        updateSlidePosition();
+        // Initial render
+        router();
     </script>
 </body>
-
 </html>
