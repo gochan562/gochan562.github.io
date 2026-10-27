@@ -721,9 +721,22 @@
             html += `</div>`;
             app.innerHTML = html;
 
-            // Initiate typing effect for the first post
+            // Render posts
             if (posts.length > 0) {
-                typeOutPost(document.getElementById('post-0'));
+                posts.forEach((post, index) => {
+                    const el = document.getElementById(`post-${index}`);
+                    if (index === 0) {
+                        // Type out the first post
+                        typeOutPost(el);
+                    } else {
+                        // Render the rest immediately
+                        try {
+                            el.innerHTML = marked.parse(unescapeHtml(el.dataset.content));
+                        } catch (e) {
+                            el.textContent = unescapeHtml(el.dataset.content);
+                        }
+                    }
+                });
             }
         }
 
