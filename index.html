@@ -9,6 +9,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Markdown Parser -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <style>
         :root {
@@ -345,9 +348,37 @@
             font-family: 'Spectral', serif;
             font-size: 1.15rem;
             line-height: 1.8;
-            white-space: pre-wrap;
             word-wrap: break-word;
             min-height: 150px;
+        }
+
+        /* Markdown Generated Elements Styling */
+        .log-content h1, .log-content h2, .log-content h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            margin-bottom: 16px;
+            margin-top: 24px;
+            line-height: 1.2;
+        }
+        .log-content h1 { font-size: 2rem; }
+        .log-content h2 { font-size: 1.5rem; }
+        .log-content h3 { font-size: 1.25rem; }
+        .log-content p { margin-bottom: 16px; }
+        .log-content ul, .log-content ol { margin-bottom: 16px; padding-left: 24px; }
+        .log-content li { margin-bottom: 8px; }
+        .log-content a { color: var(--fg); text-decoration: underline; }
+        .log-content code { font-family: 'Space Mono', monospace; background: var(--subtle-bg-2); padding: 2px 4px; border: 1px solid var(--border); font-size: 0.9rem; }
+        .log-content pre { background: var(--subtle-bg); border: 1px solid var(--border); padding: 16px; overflow-x: auto; margin-bottom: 16px; }
+        .log-content pre code { border: none; padding: 0; background: none; }
+        .log-content blockquote { border-left: 4px solid var(--border); padding-left: 16px; margin: 16px 0; color: var(--muted); font-style: italic; }
+
+        /* Typewriter Cursor */
+        .typing-cursor::after {
+            content: '▋';
+            animation: blink 1s step-end infinite;
+            margin-left: 2px;
+            font-weight: normal;
+            display: inline-block;
         }
 
         /* --- ADMIN --- */
@@ -392,14 +423,6 @@
             background: var(--fg);
             color: var(--bg);
             box-shadow: 4px 4px 0 var(--border);
-        }
-
-        /* Cursor for typing effect */
-        .cursor::after {
-            content: '▋';
-            animation: blink 1s step-end infinite;
-            margin-left: 2px;
-            font-weight: normal;
         }
 
         @keyframes blink {
@@ -503,6 +526,12 @@
     </div>
 
     <script>
+        // Configure marked (Markdown parser)
+        marked.setOptions({
+            gfm: true, // GitHub Flavored Markdown
+            breaks: true // Convert \n to <br>
+        });
+
         // --- STATE & ROUTING ---
         const app = document.getElementById('app');
 
@@ -543,9 +572,9 @@
                     <span>Home</span>
                 </div>
                 <div style="font-family: 'Spectral', serif; font-size: 1.3rem; line-height: 1.7; max-width: 600px;">
-                    <p style="margin-bottom: 24px;">This is the workbench of Andrew Wu. Student developer, researcher, and systems thinker.</p>
-                    <p style="margin-bottom: 24px;">I build tools that sit between abstract logic and visual output. From emulators made of shapes to AI workbenches that simplify complexity.</p>
-                    <p>Use the modules on the left to navigate the system.</p>
+                    <p style="margin-bottom: 24px;">Yo guys this is my website. I tried to make it lowkey cool.</p>
+                    <p style="margin-bottom: 24px;">I like building experimental stuffs and actually useful tools that are not just AI slop. I also make video games. Search "gochan562" on google to see my itch.io profile (only 1 game now tho)</p>
+                    <p style="margin-bottom: 24px;">Use the modules on the left to navigate.</p>
                 </div>
                 <div style="margin-top: 64px; border-top: 2px solid var(--border); padding-top: 24px;">
                     <p style="font-family: 'Space Mono', monospace; font-size: 0.9rem; margin-bottom: 16px; text-transform: uppercase;">Subsystems:</p>
@@ -648,8 +677,8 @@
             `;
             
             try {
-                // Attempt to fetch the global posts.json file
-                const response = await fetch('posts.json');
+                // We add ?t=timestamp to bust the browser cache so it always gets the latest from GitHub
+                const response = await fetch('posts.json?t=' + Date.now());
                 if (response.ok) {
                     posts = await response.json();
                 } else {
@@ -657,7 +686,7 @@
                 }
             } catch (e) {
                 // Fallback to localStorage if testing locally without the json file
-                console.log("Fetch failed, falling back to local storage");
+                console.log("Fetch failed, falling back to local storage. Error: ", e);
                 posts = JSON.parse(localStorage.getItem('andrew_blog_posts') || '[]');
             }
 
@@ -696,19 +725,18 @@
         function typeOutPost(element) {
             const content = unescapeHtml(element.dataset.content);
             element.innerHTML = ''; 
-            element.classList.add('cursor');
 
             let i = 0;
             const speed = 15; // ms per char
 
             function type() {
                 if (i < content.length) {
-                    let char = content.charAt(i);
-                    if (char === '\n') {
-                        element.innerHTML += '<br>';
-                    } else {
-                        element.innerHTML += char;
-                    }
+                    let currentText = content.substring(0, i + 1);
+                    
+                    // Parse the accumulated text as Markdown, and append a cursor span
+                    // We wrap it in a div to ensure block elements render correctly
+                    element.innerHTML = `<div class="typing-cursor">${marked.parse(currentText)}</div>`;
+                    
                     i++;
 
                     // Scroll the main area if content overflows while typing
@@ -716,7 +744,8 @@
                     main.scrollTop = main.scrollHeight;
                     setTimeout(type, speed);
                 } else {
-                    element.classList.remove('cursor');
+                    // Final render without cursor
+                    element.innerHTML = marked.parse(content);
                 }
             }
             type();
@@ -735,11 +764,17 @@
                         <input type="text" id="postTitle" placeholder="Enter title...">
                     </div>
                     <div>
-                        <label style="font-family: 'Space Mono', monospace; font-size: 0.8rem; text-transform: uppercase; display:block; margin-bottom: 8px;">Content</label>
+                        <label style="font-family: 'Space Mono', monospace; font-size: 0.8rem; text-transform: uppercase; display:block; margin-bottom: 8px;">Content (Markdown Supported)</label>
                         <textarea id="postContent" rows="15" placeholder="Type your log entry here...
 
-Use \n for new lines.
-**This won't parse as bold, it will just type out the raw text.**"></textarea>
+# Markdown is supported!
+**Bold**, *italics*, [links](https://google.com), 
+- lists
+- items
+
+\`\`\`
+code blocks
+\`\`\`"></textarea>
                     </div>
                     <button id="generateJsonBtn">GENERATE JSON SNIPPET</button>
                     
@@ -753,7 +788,7 @@ Use \n for new lines.
 
             document.getElementById('generateJsonBtn').addEventListener('click', () => {
                 const title = document.getElementById('postTitle').value;
-                const content = document.getElementById('postContent').value;
+                const content = document.getElementById('postContent").value;
 
                 if (!title || !content) {
                     alert('ERROR: Fields cannot be empty.');
