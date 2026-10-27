@@ -6,7 +6,7 @@
   },
   {
     "title": "Markdown test.",
-    "content": "# Title?\n## Subtitle?\nThis is a test of the integrated markdown.\n\n- one thing\n- another thing\n\nThis is **important**, this is *normal*.\n\n[https://google.com]\n\n```\nprint(\"hello there\")\n```",
+    "content": "# Title?\n## Subtitle?\nThis is a test of the integrated markdown.\n\n- one thing\n- another thing\n\nThis is **important**, this is *normal*.\n\n[test](https://google.com)",
     "date": "2026-10-27"
   }
 ]
