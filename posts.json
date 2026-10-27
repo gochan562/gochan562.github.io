@@ -3,5 +3,10 @@
     "title": "I made a personal website!!!",
     "content": "#Test\n\nYay first blog for the website!",
     "date": "2026-10-25"
+  },
+  {
+    "title": "Markdown test.",
+    "content": "# Title?\n## Subtitle?\nThis is a test of the integrated markdown.\n\n- one thing\n- another thing\n\nThis is **important**, this is *normal*.\n\n[https://google.com]\n\n```\nprint(\"hello there\")\n```",
+    "date": "2026-10-27"
   }
 ]
