@@ -373,6 +373,9 @@
         .log-content blockquote { border-left: 4px solid var(--border); padding-left: 16px; margin: 16px 0; color: var(--muted); font-style: italic; }
 
         /* Typewriter Cursor */
+        .typing-cursor {
+            display: inline-block;
+        }
         .typing-cursor::after {
             content: '▋';
             animation: blink 1s step-end infinite;
@@ -527,10 +530,12 @@
 
     <script>
         // Configure marked (Markdown parser)
-        marked.setOptions({
-            gfm: true, // GitHub Flavored Markdown
-            breaks: true // Convert \n to <br>
-        });
+        if (typeof marked !== 'undefined') {
+            marked.setOptions({
+                gfm: true, // GitHub Flavored Markdown
+                breaks: true // Convert \n to <br>
+            });
+        }
 
         // --- STATE & ROUTING ---
         const app = document.getElementById('app');
@@ -733,9 +738,29 @@
                 if (i < content.length) {
                     let currentText = content.substring(0, i + 1);
                     
-                    // Parse the accumulated text as Markdown, and append a cursor span
-                    // We wrap it in a div to ensure block elements render correctly
-                    element.innerHTML = `<div class="typing-cursor">${marked.parse(currentText)}</div>`;
+                    try {
+                        // Parse the accumulated text as Markdown
+                        element.innerHTML = marked.parse(currentText);
+                        
+                        // Find the deepest last element to append the cursor inside it
+                        let lastChild = element.lastElementChild;
+                        let cursor = document.createElement('span');
+                        cursor.className = 'typing-cursor';
+                        
+                        // Traverse down to the deepest last child (e.g., inside <li> or <p>)
+                        while (lastChild && lastChild.lastElementChild) {
+                            lastChild = lastChild.lastElementChild;
+                        }
+                        
+                        if (lastChild) {
+                            lastChild.appendChild(cursor);
+                        } else {
+                            element.appendChild(cursor);
+                        }
+                    } catch (e) {
+                        // Fallback to raw text if marked fails
+                        element.innerHTML = `<span class="typing-cursor">${escapeHtml(currentText)}</span>`;
+                    }
                     
                     i++;
 
@@ -745,7 +770,11 @@
                     setTimeout(type, speed);
                 } else {
                     // Final render without cursor
-                    element.innerHTML = marked.parse(content);
+                    try {
+                        element.innerHTML = marked.parse(content);
+                    } catch (e) {
+                        element.textContent = content;
+                    }
                 }
             }
             type();
