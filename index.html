@@ -706,13 +706,15 @@
                 html += `<p style="font-family: 'Spectral', serif; font-size: 1.2rem; color: var(--muted);">No transmissions yet. Check back later.</p>`;
             } else {
                 posts.forEach((post, index) => {
+                    // Use encodeURIComponent to safely embed content in the HTML attribute without breaking quotes
+                    const encodedContent = encodeURIComponent(post.content || '');
                     html += `
                         <div class="log-entry">
                             <div class="log-header">
                                 <h3>${escapeHtml(post.title)}</h3>
                                 <span class="log-date">${post.date}</span>
                             </div>
-                            <div class="log-content" id="post-${index}" data-content="${escapeHtml(post.content)}"></div>
+                            <div class="log-content" id="post-${index}" data-content="${encodedContent}"></div>
                         </div>
                     `;
                 });
@@ -730,10 +732,11 @@
                         typeOutPost(el);
                     } else {
                         // Render the rest immediately
+                        const decodedContent = decodeURIComponent(el.dataset.content || '');
                         try {
-                            el.innerHTML = marked.parse(unescapeHtml(el.dataset.content));
+                            el.innerHTML = marked.parse(decodedContent) || '';
                         } catch (e) {
-                            el.textContent = unescapeHtml(el.dataset.content);
+                            el.textContent = decodedContent;
                         }
                     }
                 });
@@ -741,7 +744,8 @@
         }
 
         function typeOutPost(element) {
-            const content = unescapeHtml(element.dataset.content);
+            // Use decodeURIComponent to safely read the content back
+            const content = decodeURIComponent(element.dataset.content || '');
             element.innerHTML = ''; 
 
             let i = 0;
@@ -753,7 +757,8 @@
                     
                     try {
                         // Parse the accumulated text as Markdown
-                        element.innerHTML = marked.parse(currentText);
+                        let parsedHtml = marked.parse(currentText) || '';
+                        element.innerHTML = parsedHtml;
                         
                         // Find the deepest last element to append the cursor inside it
                         let lastChild = element.lastElementChild;
@@ -784,7 +789,7 @@
                 } else {
                     // Final render without cursor
                     try {
-                        element.innerHTML = marked.parse(content);
+                        element.innerHTML = marked.parse(content) || '';
                     } catch (e) {
                         element.textContent = content;
                     }
